@@ -29,7 +29,7 @@ public class Controller3D {
     private void redraw() {
         panel.clear();
 
-
+        // TODO: Vymazat Z-Buffer
 
         panel.repaint();
     }
