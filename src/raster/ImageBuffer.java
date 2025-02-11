@@ -46,4 +46,5 @@ public class ImageBuffer implements Raster<Col> {
     public Graphics getGraphics() {
         return image.getGraphics();
     }
+
 }
