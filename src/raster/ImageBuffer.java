@@ -4,6 +4,7 @@ import transforms.Col;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Optional;
 
 public class ImageBuffer implements Raster<Col> {
 
@@ -15,12 +16,14 @@ public class ImageBuffer implements Raster<Col> {
 
     @Override
     public void setValue(int x, int y, Col value) {
+        if (!isInside(x,y)) return;
         image.setRGB(x, y, value.getRGB());
     }
 
     @Override
-    public Col getValue(int x, int y) {
-        return new Col(image.getRGB(x, y));
+    public Optional<Col> getValue(int x, int y) {
+        if (!isInside(x,y)) return Optional.empty();
+        return Optional.of(new Col(image.getRGB(x, y)));
     }
 
     @Override

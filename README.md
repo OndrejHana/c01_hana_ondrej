@@ -17,8 +17,8 @@
 
 # TODO
 
-- [ ] Naprogramovat Z-Buffer
-- [ ] Otestovat Z-Buffer na jednom pixelu
+- [x] Naprogramovat Z-Buffer
+- [x] Otestovat Z-Buffer na jednom pixelu
 - [ ] Otestovat Z-Buffer na trojúhelníku
 - [ ] Rasterizace
 - [ ] Těleso
