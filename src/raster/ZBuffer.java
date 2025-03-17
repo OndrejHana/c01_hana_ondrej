@@ -3,8 +3,6 @@ package raster;
 import transforms.Col;
 import types.ScreenPoint;
 
-import java.awt.*;
-
 public class ZBuffer {
     private final Raster<Col> imageBuffer;
     private final Raster<Double> depthBuffer;

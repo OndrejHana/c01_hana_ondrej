@@ -1,7 +1,6 @@
 package types;
 
 import transforms.Col;
-import transforms.Vec3D;
 
 public class ScreenPoint {
     private final int x;

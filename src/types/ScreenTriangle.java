@@ -22,10 +22,6 @@ public class ScreenTriangle {
         this.c = c;
     }
 
-//    public boolean isCW() {
-//        return EdgeFunction.edgeFunction(a.getX(), a.getY(), b.getX(), b.getY(), c.getX(), c.getY()) > 0;
-//    }
-
     public BoundingRect getBoundingRect() {
         var xmin = Math.min(a.getX(), Math.min(b.getX(), c.getX()));
         var xmax = Math.max(a.getX(), Math.max(b.getX(), c.getX()));

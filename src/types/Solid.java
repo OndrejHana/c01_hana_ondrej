@@ -11,9 +11,6 @@ public class Solid {
     private final List<Part> partsBuffer;
     private final Mat4 modelTransformation;
 
-    public record Triangle(Vertex a, Vertex b, Vertex c) {}
-    public record Line(Vertex a, Vertex b) {}
-
     public Solid(List<Vertex> vertexBuffer, List<Integer> indexBuffer, List<Part> partsBuffer, Mat4 modelTransformation) {
         this.vertexBuffer = vertexBuffer;
         this.indexBuffer = indexBuffer;

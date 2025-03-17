@@ -59,19 +59,19 @@ public class Main {
         );
         render(solids);
 
-//        window.getPanel().addMouseMotionListener(new MouseMotionAdapter() {
-//            @Override
-//            public void mouseMoved(MouseEvent e) {
-//                var deltaX = e.getX() / (center.getX() / Math.PI);
-//                var deltaY = e.getY() / (center.getY() / Math.PI * 0.5);
-//
-//                camera = camera
-//                        .withAzimuth(deltaX)
-//                        .withZenith(deltaY);
-//
-//                render(solids);
-//            }
-//        });
+        window.getPanel().addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                var deltaX = e.getX() / (center.getX() / Math.PI);
+                var deltaY = e.getY() / (center.getY() / Math.PI * 0.5);
+
+                camera = camera
+                        .withAzimuth(deltaX)
+                        .withZenith(deltaY);
+
+                render(solids);
+            }
+        });
 
         window.getPanel().addKeyListener(new KeyAdapter() {
             @Override
