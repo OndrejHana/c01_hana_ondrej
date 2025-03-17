@@ -1,5 +1,6 @@
 package raster;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 public class DepthBuffer implements Raster<Double> {
@@ -40,9 +41,7 @@ public class DepthBuffer implements Raster<Double> {
     @Override
     public void clear() {
         for (double[] doubles : buffer) {
-            for (int i = 0; i < doubles.length; i++) {
-                buffer[i][i] = 1.0;
-            }
+            Arrays.fill(doubles, 1.0);
         }
     }
 }
