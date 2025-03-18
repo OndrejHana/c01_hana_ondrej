@@ -10,26 +10,18 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.List;
 
-import static lib.SolidGenerator.*;
+import static lib.SolidGenerator.getSolid2;
+import static lib.SolidGenerator.getSolid4;
 
 public class Main {
     static final double cameraSpeed = 0.5;
     static final double mouseSensitivity = 0.005;
     static final int width = 800;
     static final int height = 600;
-    static Vec2D center = new Vec2D((double) width / 2, (double) height / 2);
 
     static final Window window = new Window(width, height);
     static final ZBuffer zbuffer = new ZBuffer(window.getPanel().getRaster());
-    static Camera camera = new Camera(
-            new Vec3D(5, 0, 0),
-            Math.PI,
-            0,
-//            Math.PI - (Math.PI / 12),
-//            (Math.PI / 12),
-            3,
-            true
-    );
+
     static Mat4PerspRH projPer = new Mat4PerspRH(
             Math.toRadians(90),
             (double) zbuffer.getHeight() / zbuffer.getWidth(),
@@ -42,32 +34,43 @@ public class Main {
             10.0
     );
     static Mat4 currProj = projPer;
+    private static int lastX = width / 2;
+    private static int lastY = height / 2;
+    private static final double sensitivity = 0.005; // Adjust for desired responsiveness
+    static Camera camera = new Camera(
+            new Vec3D(0, 0, 0),
+            Math.PI,
+            0,
+            3,
+            false
+    );
 
     static void render(List<Solid> s) {
         var panel = window.getPanel();
-
         zbuffer.clear();
         s.forEach(solid -> Pipeline.transform(solid, camera, currProj, zbuffer));
         panel.repaint();
     }
 
     public static void main(String[] args) {
-        var s = getSolid2();
-        List<Solid> solids = List.of(
-                s
-//                new Solid(s.getVertexBuffer(), s.getIndexBuffer(), s.getPartsBuffer(), new Mat4Transl(1.0, 0, 0).mul(new Mat4Scale(1.5)))
-        );
+        List<Solid> solids = List.of(getSolid2(), getSolid4().getTransformed(new Mat4Transl(0,-1.0,0)));
         render(solids);
 
         window.getPanel().addMouseMotionListener(new MouseMotionAdapter() {
             @Override
-            public void mouseMoved(MouseEvent e) {
-                var deltaX = e.getX() / (center.getX() / Math.PI);
-                var deltaY = e.getY() / (center.getY() / Math.PI * 0.5);
+            public void mouseDragged(MouseEvent e) {
+                int x = e.getX();
+                int y = e.getY();
+
+                int dx = x - lastX;
+                int dy = y - lastY;
 
                 camera = camera
-                        .withAzimuth(deltaX)
-                        .withZenith(deltaY);
+                        .addAzimuth(dx * sensitivity)
+                        .addZenith(dy * sensitivity * -1);
+
+                lastX = x;
+                lastY = y;
 
                 render(solids);
             }
@@ -90,11 +93,9 @@ public class Main {
                 }
                 if (e.getKeyCode() == KeyEvent.VK_F) {
                     camera = camera.forward(cameraSpeed);
-                    System.out.println(camera.getPosition());
                 }
                 if (e.getKeyCode() == KeyEvent.VK_B) {
                     camera = camera.backward(cameraSpeed);
-                    System.out.println(camera.getPosition());
                 }
                 if (e.getKeyCode() == KeyEvent.VK_P) {
                     if (currProj == projPer) {

@@ -23,7 +23,7 @@ public class TriangleRasterization {
         if (abc > 0) {
             rasterizeCCW(t, zbuffer);
         } else {
-            rasterizeCW(t , zbuffer);
+            rasterizeCW(t, zbuffer);
         }
     }
 
@@ -55,18 +55,38 @@ public class TriangleRasterization {
                     var w1 = cap / abc;
                     var w2 = abp / abc;
 
-                    var acol = a.getColor();
-                    var bcol = b.getColor();
-                    var ccol = c.getColor();
+                    Col col = null;
+                    if (t.getTexture().isPresent()) {
+                        var tex = t.getTexture().get();
 
-                    var pr = (acol.getR() * w0) + (bcol.getR() * w1) + (ccol.getR() * w2);
-                    var pg = (acol.getG() * w0) + (bcol.getG() * w1) + (ccol.getG() * w2);
-                    var pb = (acol.getB() * w0) + (bcol.getB() * w1) + (ccol.getB() * w2);
+                        var au = a.getU();
+                        var bu = b.getU();
+                        var cu = c.getU();
 
-                    var col = new Col(pr, pg, pb);
+                        var av = a.getV();
+                        var bv = b.getV();
+                        var cv = c.getV();
+
+                        var pu = (au * w0) + (bu * w1) + (cu * w2);
+                        var pv = (av * w0) + (bv * w1) + (cv * w2);
+
+                        var u = (int) Math.round(pu * (tex.getWidth() -1));
+                        var v = (int) Math.round(pv * (tex.getHeight() -1 ));
+
+                        col =  new Col(tex.getRGB(u,v));
+                    } else {
+                        var acol = a.getColor();
+                        var bcol = b.getColor();
+                        var ccol = c.getColor();
+
+                        var pr = (acol.getR() * w0) + (bcol.getR() * w1) + (ccol.getR() * w2);
+                        var pg = (acol.getG() * w0) + (bcol.getG() * w1) + (ccol.getG() * w2);
+                        var pb = (acol.getB() * w0) + (bcol.getB() * w1) + (ccol.getB() * w2);
+
+                        col = new Col(pr, pg, pb);
+                    }
 
                     var z = a.getZ() * w0 + b.getZ() * w1 + c.getZ() * w2;
-
                     zbuffer.setPixelWithZTest(x, y, z, col);
                 }
             }
@@ -101,18 +121,38 @@ public class TriangleRasterization {
                     var w1 = cap / abc;
                     var w2 = abp / abc;
 
-                    var acol = a.getColor();
-                    var bcol = b.getColor();
-                    var ccol = c.getColor();
+                    Col col = null;
+                    if (t.getTexture().isPresent()) {
+                        var tex = t.getTexture().get();
 
-                    var pr = (acol.getR() * w0) + (bcol.getR() * w1) + (ccol.getR() * w2);
-                    var pg = (acol.getG() * w0) + (bcol.getG() * w1) + (ccol.getG() * w2);
-                    var pb = (acol.getB() * w0) + (bcol.getB() * w1) + (ccol.getB() * w2);
+                        var au = a.getU();
+                        var bu = b.getU();
+                        var cu = c.getU();
 
-                    var col = new Col(pr, pg, pb);
+                        var av = a.getV();
+                        var bv = b.getV();
+                        var cv = c.getV();
+
+                        var pu = (au * w0) + (bu * w1) + (cu * w2);
+                        var pv = (av * w0) + (bv * w1) + (cv * w2);
+
+                        var u = (int) Math.round(pu * (tex.getWidth() -1));
+                        var v = (int) Math.round(pv * (tex.getHeight() -1 ));
+
+                        col =  new Col(tex.getRGB(u,v));
+                    } else {
+                        var acol = a.getColor();
+                        var bcol = b.getColor();
+                        var ccol = c.getColor();
+
+                        var pr = (acol.getR() * w0) + (bcol.getR() * w1) + (ccol.getR() * w2);
+                        var pg = (acol.getG() * w0) + (bcol.getG() * w1) + (ccol.getG() * w2);
+                        var pb = (acol.getB() * w0) + (bcol.getB() * w1) + (ccol.getB() * w2);
+
+                        col = new Col(pr, pg, pb);
+                    }
 
                     var z = a.getZ() * w0 + b.getZ() * w1 + c.getZ() * w2;
-
                     zbuffer.setPixelWithZTest(x, y, z, col);
                 }
             }

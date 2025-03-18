@@ -19,7 +19,7 @@
 
 - [x] Naprogramovat Z-Buffer
 - [x] Otestovat Z-Buffer na jednom pixelu
-- [ ] Otestovat Z-Buffer na trojúhelníku
-- [ ] Rasterizace
+- [x] Otestovat Z-Buffer na trojúhelníku
+- [x] Rasterizace
 - [ ] Těleso
-- [ ] Ořezání
+- [x] Ořezání

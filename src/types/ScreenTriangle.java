@@ -1,9 +1,13 @@
 package types;
 
+import java.awt.image.BufferedImage;
+import java.util.Optional;
+
 public class ScreenTriangle {
     private final ScreenPoint a;
     private final ScreenPoint b;
     private final ScreenPoint c;
+    private final Optional<BufferedImage> texture;
 
     public record BoundingRect(int xmin, int ymin, int xmax, int ymax) {}
 
@@ -16,10 +20,11 @@ public class ScreenTriangle {
                 '}';
     }
 
-    public ScreenTriangle(ScreenPoint a, ScreenPoint b, ScreenPoint c) {
+    public ScreenTriangle(ScreenPoint a, ScreenPoint b, ScreenPoint c, Optional<BufferedImage> texture) {
         this.a = a;
         this.b = b;
         this.c = c;
+        this.texture = texture;
     }
 
     public BoundingRect getBoundingRect() {
@@ -41,5 +46,9 @@ public class ScreenTriangle {
 
     public ScreenPoint getC() {
         return c;
+    }
+
+    public Optional<BufferedImage> getTexture() {
+        return texture;
     }
 }

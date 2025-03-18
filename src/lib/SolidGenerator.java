@@ -8,8 +8,12 @@ import types.Solid;
 import types.Topology;
 import types.Vertex;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public class SolidGenerator {
     public static Solid getSolid1() {
@@ -33,7 +37,8 @@ public class SolidGenerator {
                         new Part(0, 4, Topology.TRIANGLE),
                         new Part(12, 3, Topology.LINE)
                 ),
-                new Mat4Identity()
+                new Mat4Identity(),
+                Optional.empty()
         );
     }
 
@@ -59,7 +64,8 @@ public class SolidGenerator {
                 List.of(
                         new Part(0, 4, Topology.TRIANGLE)
                 ),
-                new Mat4Identity()
+                new Mat4Identity(),
+                Optional.empty()
         );
     }
 
@@ -74,20 +80,28 @@ public class SolidGenerator {
                 ),
                 List.of(0, 1, 2, 3, 4),
                 List.of(new Part(0, 2, Topology.TRIANGLE), new Part(3, 1, Topology.LINE)),
-                new Mat4Identity()
+                new Mat4Identity(),
+                Optional.empty()
         );
     }
 
     public static Solid getSolid4() {
-        return new Solid(
-                List.of(
-                        new Vertex(new Point3D(0, 0.5, 0), new Col(1.0, 0, 0), 0, 0, null),
-                        new Vertex(new Point3D(0, -0.5, 0), new Col(0, 1.0, 0), 0, 0, null),
-                        new Vertex(new Point3D(1.0, 0, 0.5), new Col(0, 0, 1.0), 0, 0, null)
-                        ),
-                List.of(0, 1, 2),
-                List.of(new Part(0, 1, Topology.TRIANGLE)),
-                new Mat4Identity()
-        );
+        try {
+
+            return new Solid(
+                    List.of(
+                            new Vertex(new Point3D(0, 0.5, 0), new Col(1.0, 0, 0), 0, 1.0, null),
+                            new Vertex(new Point3D(0, -0.5, 0), new Col(0, 1.0, 0), 1.0, 0.5, null),
+                            new Vertex(new Point3D(1.0, 0, 0.5), new Col(0, 0, 1.0), 0, 0, null)
+                    ),
+                    List.of(0, 1, 2),
+                    List.of(new Part(0, 1, Topology.TRIANGLE)),
+                    new Mat4Identity(),
+                    Optional.of(ImageIO.read(new File("./resources/P3080010.jpg")))
+            );
+        } catch (IOException e) {
+            System.out.println("rip");
+            return null;
+        }
     }
 }
