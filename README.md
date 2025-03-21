@@ -21,5 +21,5 @@
 - [x] Otestovat Z-Buffer na jednom pixelu
 - [x] Otestovat Z-Buffer na trojúhelníku
 - [x] Rasterizace
-- [ ] Těleso
+- [x] Těleso
 - [x] Ořezání
