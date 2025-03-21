@@ -20,4 +20,5 @@ public class LinearInterpolation {
 
         return new Col(r,g,b);
     }
+
 }

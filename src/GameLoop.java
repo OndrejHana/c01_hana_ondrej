@@ -1,20 +1,19 @@
 import lib.Pipeline;
+import lib.SolidGenerator;
 import raster.ZBuffer;
 import transforms.*;
 import types.RenderMode;
 import types.Solid;
+import types.TransformationMode;
 import view.Window;
 
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import javax.swing.*;
+import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
-import static lib.SolidGenerator.getSolid2;
-import static lib.SolidGenerator.getSolid4;
+import static lib.SolidGenerator.*;
 
 public class GameLoop {
     static final double cameraSpeed = 0.5;
@@ -22,25 +21,13 @@ public class GameLoop {
     static final int width = 800;
     static final int height = 600;
 
+    static final int TARGET_FPS = 60;
+    static final long OPTIMAL_FRAME_TIME = 1000000000L / TARGET_FPS;
+    static long LAST_FRAME_TIME;
+
     static final Window window = new Window(width, height);
     static final ZBuffer zbuffer = new ZBuffer(window.getPanel().getRaster());
 
-    static Mat4PerspRH projPer = new Mat4PerspRH(
-            Math.toRadians(90),
-            (double) zbuffer.getHeight() / zbuffer.getWidth(),
-            0.1,
-            100);
-    static Mat4OrthoRH projOrtho = new Mat4OrthoRH(
-            5,
-            5,
-            -1.0,
-            10.0
-    );
-
-    static RenderMode renderMode = RenderMode.FILL;
-    static Mat4 currProj = projPer;
-    private static int lastX = width / 2;
-    private static int lastY = height / 2;
     static Camera camera = new Camera(
             new Vec3D(0, 0, 0),
             Math.PI,
@@ -49,22 +36,78 @@ public class GameLoop {
             false
     );
 
-    static ArrayList<Solid> scene = new ArrayList<>(List.of(getSolid2(), getSolid4().getTransformed(new Mat4Scale(3).mul(new Mat4Transl(0, -4.0, 0)))));
+    static int lastX = width / 2;
+    static int lastY = height / 2;
 
-    private static final int TARGET_FPS = 60;
-    private static final long OPTIMAL_FRAME_TIME = 1000000000L / TARGET_FPS;
-    public static long LAST_FRAME_TIME;
-    public static volatile boolean running = true;
+    static Mat4PerspRH projPer = new Mat4PerspRH(
+            Math.toRadians(90),
+            (double) zbuffer.getHeight() / zbuffer.getWidth(),
+            0.1,
+            100.0);
+    static Mat4OrthoRH projOrtho = new Mat4OrthoRH(
+            20.0,
+            20.0,
+            0.1,
+            10.0
+    );
+
+    static RenderMode renderMode = RenderMode.FILL;
+    static Mat4 currProj = projPer;
+
+    static Optional<Integer> selected = Optional.empty();
+    static TransformationMode currTransformationMode = TransformationMode.NONE;
+
+    static ArrayList<Solid> scene = new ArrayList<>(List.of(
+            getSolid2(),
+            getSolid4().getTransformed(new Mat4Scale(3).mul(new Mat4Transl(0, -4.0, 0))),
+            getAxis()
+    ));
 
     static void animate(int solid) {
         var s = scene.get(solid);
-        scene.set(solid, s.getTransformed(new Mat4RotZ(1.0/60*Math.PI)));
+        scene.set(solid, s.getTransformed(new Mat4RotZ(Math.PI/60)));
+    }
+
+    static void transform(int direction) {
+        if (selected.isEmpty()) {
+            return;
+        }
+
+        var curr = scene.get(selected.get());
+        curr = switch (currTransformationMode) {
+            case TRANSLATION -> switch (direction) {
+                case KeyEvent.VK_LEFT -> curr.getTransformed(new Mat4Transl(0,-1.0,0));
+                case KeyEvent.VK_RIGHT -> curr.getTransformed(new Mat4Transl(0,1.0,0));
+                case KeyEvent.VK_DOWN -> curr.getTransformed(new Mat4Transl(0,0, -1.0));
+                case KeyEvent.VK_UP -> curr.getTransformed(new Mat4Transl(0,0, 1.0));
+                default -> curr;
+            };
+            case SCALE -> switch (direction) {
+                case KeyEvent.VK_UP -> curr.getTransformed(new Mat4Scale(1.2));
+                case KeyEvent.VK_DOWN -> curr.getTransformed(new Mat4Scale(0.8));
+                default -> curr;
+            };
+            case ROTATION -> switch (direction) {
+                case KeyEvent.VK_UP -> curr.getTransformed(new Mat4RotY(-Math.PI/30));
+                case KeyEvent.VK_DOWN -> curr.getTransformed(new Mat4RotY(Math.PI/30));
+                case KeyEvent.VK_LEFT -> curr.getTransformed(new Mat4RotZ(-Math.PI/30));
+                case KeyEvent.VK_RIGHT -> curr.getTransformed(new Mat4RotZ(Math.PI/30));
+                default -> curr;
+            };
+            case NONE -> curr;
+        };
+
+        scene.set(selected.get(), curr);
     }
 
     static void render() {
         var panel = window.getPanel();
         zbuffer.clear();
-        scene.forEach(solid -> Pipeline.transform(solid, camera, currProj, zbuffer, renderMode));
+        for (int i = 0; i < scene.size(); i++) {
+            var solid = scene.get(i);
+            var isselected = selected.isPresent() && selected.get() == i;
+            Pipeline.transform(solid, camera, currProj, zbuffer, renderMode, isselected);
+        }
         panel.repaint();
     }
 
@@ -78,18 +121,25 @@ public class GameLoop {
                 int dx = x - lastX;
                 int dy = y - lastY;
 
+                lastX = x;
+                lastY = y;
+
                 camera = camera
                         .addAzimuth(dx * sensitivity)
                         .addZenith(dy * sensitivity * -1);
-
-                lastX = x;
-                lastY = y;
             }
         });
 
         window.getPanel().addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() >= 0x30 && e.getKeyCode() < (0x30 + scene.size())) {
+                    selected = Optional.of(e.getKeyCode()-0x30);
+                }
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    selected = Optional.empty();
+                }
+
                 if (e.getKeyCode() == KeyEvent.VK_S) {
                     camera = camera.down(cameraSpeed);
                 }
@@ -122,12 +172,26 @@ public class GameLoop {
                         renderMode = RenderMode.LINE;
                     }
                 }
+
+                if (e.getKeyCode() == KeyEvent.VK_T) {
+                    currTransformationMode = TransformationMode.TRANSLATION;
+                }
+                if (e.getKeyCode() == KeyEvent.VK_R) {
+                    currTransformationMode = TransformationMode.ROTATION;
+                }
+                if (e.getKeyCode() == KeyEvent.VK_Y) {
+                    currTransformationMode = TransformationMode.SCALE;
+                }
+
+                if (e.getKeyCode() >= 0x25 && e.getKeyCode() <= 0x28 && selected.isPresent() && currTransformationMode != TransformationMode.NONE) {
+                    transform(e.getKeyCode());
+                }
             }
         });
 
         long lastLoopTime = System.nanoTime();
 
-        while (running) {
+        while (true) {
             long now = System.nanoTime();
             long updateLength = now - lastLoopTime;
             lastLoopTime = now;
@@ -138,7 +202,6 @@ public class GameLoop {
             long endTime = System.nanoTime();
             LAST_FRAME_TIME = endTime - now; // time spent updating + rendering
             long sleepTime = (OPTIMAL_FRAME_TIME - LAST_FRAME_TIME) / 1000000; // convert ns to ms
-            System.out.println(LAST_FRAME_TIME / 1000000);
 
             if (sleepTime > 0) {
                 try {
