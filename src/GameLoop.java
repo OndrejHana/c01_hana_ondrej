@@ -9,6 +9,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static lib.SolidGenerator.getSolid2;
@@ -35,7 +37,7 @@ public class GameLoop {
             10.0
     );
 
-    static RenderMode renderMode;
+    static RenderMode renderMode = RenderMode.FILL;
     static Mat4 currProj = projPer;
     private static int lastX = width / 2;
     private static int lastY = height / 2;
@@ -43,24 +45,26 @@ public class GameLoop {
             new Vec3D(0, 0, 0),
             Math.PI,
             0,
-            3,
+            10,
             false
     );
 
-    static List<Solid> scene = List.of(
-            getSolid2(),
-            getSolid4().getTransformed(new Mat4Transl(0, -1.0, 0))
-    );
+    static ArrayList<Solid> scene = new ArrayList<>(List.of(getSolid2(), getSolid4().getTransformed(new Mat4Scale(3).mul(new Mat4Transl(0, -4.0, 0)))));
 
     private static final int TARGET_FPS = 60;
     private static final long OPTIMAL_FRAME_TIME = 1000000000L / TARGET_FPS;
     public static long LAST_FRAME_TIME;
     public static volatile boolean running = true;
 
+    static void animate(int solid) {
+        var s = scene.get(solid);
+        scene.set(solid, s.getTransformed(new Mat4RotZ(1.0/60*Math.PI)));
+    }
+
     static void render() {
         var panel = window.getPanel();
         zbuffer.clear();
-        scene.forEach(solid -> Pipeline.transform(solid, camera, currProj, zbuffer));
+        scene.forEach(solid -> Pipeline.transform(solid, camera, currProj, zbuffer, renderMode));
         panel.repaint();
     }
 
@@ -111,6 +115,13 @@ public class GameLoop {
                         currProj = projPer;
                     }
                 }
+                if (e.getKeyCode() == KeyEvent.VK_M) {
+                    if (renderMode == RenderMode.LINE) {
+                        renderMode = RenderMode.FILL;
+                    } else {
+                        renderMode = RenderMode.LINE;
+                    }
+                }
             }
         });
 
@@ -121,6 +132,7 @@ public class GameLoop {
             long updateLength = now - lastLoopTime;
             lastLoopTime = now;
 
+            animate(0);
             render();
 
             long endTime = System.nanoTime();

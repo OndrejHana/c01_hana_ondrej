@@ -7,12 +7,15 @@ import transforms.Mat4;
 import transforms.Vec3D;
 import types.*;
 
+import javax.sound.sampled.Line;
 import java.util.Arrays;
 
 import static lib.LinearInterpolation.interpolateCol;
 import static lib.TriangleRasterization.rasterize;
 
 public class Pipeline {
+    static int thickness = 1;
+
     record Triangle(Vertex a, Vertex b, Vertex c) {
     }
 
@@ -28,7 +31,7 @@ public class Pipeline {
         return new Triangle(vertices[0], vertices[1], vertices[2]);
     }
 
-    public static void transform(Solid solid, Camera camera, Mat4 proj, ZBuffer zbuffer) {
+    public static void transform(Solid solid, Camera camera, Mat4 proj, ZBuffer zbuffer, RenderMode renderMode) {
         var m = solid.getModelTransformation();
         var v = camera.getViewMatrix();
 
@@ -101,7 +104,14 @@ public class Pipeline {
 
                             var ab = toWindow(new Vec3D(abx, aby, zmin), abcol, abu, abv, zbuffer.getWidth(), zbuffer.getHeight());
 
-                            rasterize(new ScreenTriangle(a, ab, ac, s.getTexture()), zbuffer);
+                            switch (renderMode) {
+                                case LINE -> {
+                                    LineRasterizerBresenham.drawLine(a, ab, zbuffer, thickness, LineRasterizerBresenham.LineColor.WHITE);
+                                    LineRasterizerBresenham.drawLine(ab, ac, zbuffer, thickness, LineRasterizerBresenham.LineColor.WHITE);
+                                    LineRasterizerBresenham.drawLine(ac, a, zbuffer, thickness, LineRasterizerBresenham.LineColor.WHITE);
+                                }
+                                case FILL -> rasterize(new ScreenTriangle(a, ab, ac, s.getTexture()), zbuffer);
+                            }
                             continue;
                         }
 
@@ -116,14 +126,34 @@ public class Pipeline {
 
                             var bc = toWindow(new Vec3D(bcx, bcy, zmin), bccol, bcu, bcv, zbuffer.getWidth(), zbuffer.getHeight());
 
-                            rasterize(new ScreenTriangle(a, b, bc, s.getTexture()), zbuffer);
-                            rasterize(new ScreenTriangle(a, bc, ac, s.getTexture()), zbuffer);
+                            switch (renderMode) {
+                                case FILL -> {
+                                    rasterize(new ScreenTriangle(a, b, bc, s.getTexture()), zbuffer);
+                                    rasterize(new ScreenTriangle(a, bc, ac, s.getTexture()), zbuffer);
+                                }
+                                case LINE -> {
+                                    LineRasterizerBresenham.drawLine(a, b, zbuffer, thickness, LineRasterizerBresenham.LineColor.WHITE);
+                                    LineRasterizerBresenham.drawLine(b, bc, zbuffer, thickness, LineRasterizerBresenham.LineColor.WHITE);
+                                    LineRasterizerBresenham.drawLine(bc, a, zbuffer, thickness, LineRasterizerBresenham.LineColor.WHITE);
+
+                                    LineRasterizerBresenham.drawLine(a, bc, zbuffer, thickness, LineRasterizerBresenham.LineColor.WHITE);
+                                    LineRasterizerBresenham.drawLine(bc, ac, zbuffer, thickness, LineRasterizerBresenham.LineColor.WHITE);
+                                    LineRasterizerBresenham.drawLine(ac, a, zbuffer, thickness, LineRasterizerBresenham.LineColor.WHITE);
+                                }
+
+                            }
                             continue;
                         }
 
                         var c = toWindow(t.c.dehomogenize(), t.c.getColor(), t.c.getU(), t.c.getV(), zbuffer.getWidth(), zbuffer.getHeight());
-                        var t2 = new ScreenTriangle(a, b, c, s.getTexture());
-                        rasterize(t2, zbuffer);
+                        switch (renderMode) {
+                            case FILL -> rasterize(new ScreenTriangle(a, b, c, s.getTexture()), zbuffer);
+                            case LINE -> {
+                                LineRasterizerBresenham.drawLine(a, b, zbuffer, thickness, LineRasterizerBresenham.LineColor.WHITE);
+                                LineRasterizerBresenham.drawLine(b, c, zbuffer, thickness, LineRasterizerBresenham.LineColor.WHITE);
+                                LineRasterizerBresenham.drawLine(c, a, zbuffer, thickness, LineRasterizerBresenham.LineColor.WHITE);
+                            }
+                        }
                     }
                 }
             }
