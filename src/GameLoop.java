@@ -1,5 +1,4 @@
 import lib.Pipeline;
-import lib.SolidGenerator;
 import raster.ZBuffer;
 import transforms.*;
 import types.RenderMode;
@@ -7,7 +6,6 @@ import types.Solid;
 import types.TransformationMode;
 import view.Window;
 
-import javax.swing.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,8 +56,8 @@ public class GameLoop {
     static TransformationMode currTransformationMode = TransformationMode.NONE;
 
     static ArrayList<Solid> scene = new ArrayList<>(List.of(
-            getSolid2(),
-            getSolid4().getTransformed(new Mat4Scale(3).mul(new Mat4Transl(0, -4.0, 0))),
+            getSolid1(),
+            getSolid2().getTransformed(new Mat4Scale(3).mul(new Mat4Transl(0, -4.0, 0))),
             getAxis()
     ));
 
@@ -190,7 +188,6 @@ public class GameLoop {
         });
 
         long lastLoopTime = System.nanoTime();
-
         while (true) {
             long now = System.nanoTime();
             long updateLength = now - lastLoopTime;
@@ -212,5 +209,4 @@ public class GameLoop {
             }
         }
     }
-
 }

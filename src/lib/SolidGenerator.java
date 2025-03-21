@@ -10,40 +10,14 @@ import types.Topology;
 import types.Vertex;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 public class SolidGenerator {
+
     public static Solid getSolid1() {
-        var w = new Col(Color.WHITE.getRGB());
-        return new Solid(
-                List.of(
-                        new Vertex(new Point3D(-1.0, 0, -1.0), w, 0, 0, null),
-                        new Vertex(new Point3D(0, 0, 1.0), w, 0, 0, null),
-                        new Vertex(new Point3D(1.0, 0, -1.0), w, 0, 0, null),
-                        new Vertex(new Point3D(0, 1.0, 0), w, 0, 0, null),
-
-                        new Vertex(new Point3D(0, 0, 0), new Col(1.0, 0, 0), 0, 0, null),
-                        new Vertex(new Point3D(0, 0, 0), new Col(0, 1.0, 0), 0, 0, null),
-                        new Vertex(new Point3D(0, 0, 0), new Col(0, 0, 1.0), 0, 0, null),
-                        new Vertex(new Point3D(1.0, 0, 0), new Col(1.0, 0, 0), 0, 0, null),
-                        new Vertex(new Point3D(0, 1.0, 0), new Col(0, 1.0, 0), 0, 0, null),
-                        new Vertex(new Point3D(0, 0, 1.0), new Col(0, 0, 1.0), 0, 0, null)
-                ),
-                List.of(0, 1, 2, 0, 1, 3, 1, 2, 3, 0, 2, 3, 4, 7, 5, 8, 6, 9),
-                List.of(
-                        new Part(0, 4, Topology.TRIANGLE),
-                        new Part(12, 3, Topology.LINE)
-                ),
-                new Mat4Identity(),
-                Optional.empty()
-        );
-    }
-
-    public static Solid getSolid2() {
         var a = new Point3D(-1.0, -1.0, 0);
         var b = new Point3D(-1.0, 1.0, 0);
         var c = new Point3D(1.0, 0, 0);
@@ -70,23 +44,7 @@ public class SolidGenerator {
         );
     }
 
-    public static Solid getSolid3() {
-        return new Solid(
-                List.of(
-                        new Vertex(new Point3D(0, 0.2, 0), new Col(1.0, 0, 0), 0, 0, null),
-                        new Vertex(new Point3D(0, -0.2, 0), new Col(1.0, 0, 0), 0, 0, null),
-                        new Vertex(new Point3D(0, 0, 1.0), new Col(1.0, 0, 0), 0, 0, null),
-                        new Vertex(new Point3D(0, 0, 0), new Col(1.0, 1.0, 1.0), 0, 0, null),
-                        new Vertex(new Point3D(0, 0, -1.0), new Col(1.0, 1.0, 1.0), 0, 0, null)
-                ),
-                List.of(0, 1, 2, 3, 4),
-                List.of(new Part(0, 1, Topology.TRIANGLE), new Part(3, 1, Topology.LINE)),
-                new Mat4Identity(),
-                Optional.empty()
-        );
-    }
-
-    public static Solid getSolid4() {
+    public static Solid getSolid2() {
         try {
 
             return new Solid(

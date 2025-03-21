@@ -155,21 +155,15 @@ public class Pipeline {
                         }
 
                         var c = toWindow(t.c.dehomogenize(), t.c.getColor(), t.c.getU(), t.c.getV(), zbuffer.getWidth(), zbuffer.getHeight());
-                        switch (renderMode) {
-                            case FILL -> {
-                                rasterize(new ScreenTriangle(a, b, c, s.getTexture()), zbuffer);
 
-                                if (isSelected) {
-                                    LineRasterizerBresenham.drawLine(a, b, zbuffer, thickness, lineColor);
-                                    LineRasterizerBresenham.drawLine(b, c, zbuffer, thickness, lineColor);
-                                    LineRasterizerBresenham.drawLine(c, a, zbuffer, thickness, lineColor);
-                                }
-                            }
-                            case LINE -> {
-                                LineRasterizerBresenham.drawLine(a, b, zbuffer, thickness, lineColor);
-                                LineRasterizerBresenham.drawLine(b, c, zbuffer, thickness, lineColor);
-                                LineRasterizerBresenham.drawLine(c, a, zbuffer, thickness, lineColor);
-                            }
+                        if (renderMode == RenderMode.FILL) {
+                            rasterize(new ScreenTriangle(a, b, c, s.getTexture()), zbuffer);
+                        }
+
+                        if (isSelected || renderMode == RenderMode.LINE) {
+                            LineRasterizerBresenham.drawLine(a, b, zbuffer, thickness, lineColor);
+                            LineRasterizerBresenham.drawLine(b, c, zbuffer, thickness, lineColor);
+                            LineRasterizerBresenham.drawLine(c, a, zbuffer, thickness, lineColor);
                         }
                     }
                 }
